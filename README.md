@@ -126,9 +126,26 @@ cf. [GitHub - henriquebastos/python-decouple: Strict separation of config from c
 _Decouple_ helps you to organize your settings so that you can change parameters without having to redeploy your app.
 
 If `SECRET_KEY` is not present in the `.env`, _decouple_ will raise an `UndefinedValueError`.
-This _fail fast_ policy helps you avoid chasing misbehaviours when you eventually forget a parameter.
+
 
 
 ### Conformité PEP8
 
+### Mesures OWASP
+### Conformité RGPG
+### Crédits
+
+Openclassrooms, bien-sur et surtout le discord DA Python!
+
+Les documentations officielles Django et DRF ; Confucuis aurait dit "une image vaut mille mots" ;-)
+
+Vitor Freitas pour les choix d'extension du modèle utilisateur sous la forme d'un questionnaire "fonctionnalités recherchées":
+[How to Extend Django User Model](https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html#proxy)
+
+Špela Giacomelli (aka GirlLovesToCode) pour sa série de billets sur les permissions DRF.
+[Permissions in Django REST Framework | TestDriven.io](https://testdriven.io/blog/drf-permissions/)
+
+Gutsytechster pour son introduction aux opérations d'Authentification dans DRF.
+
+[User Auth operations in DRF – Login, Logout, Register, Change Password – Curiosity never ends](https://gutsytechster.wordpress.com/2019/11/12/user-auth-operations-in-drf-login-logout-register-change-password/)
 
