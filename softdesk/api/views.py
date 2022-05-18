@@ -1,3 +1,2 @@
-from django.shortcuts import render
+# trial credits to https://simpleisbetterthancomplex.com/tutorial/2018/12/19/how-to-use-jwt-authentication-with-django-rest-framework.html
 
-# Create your views here.
