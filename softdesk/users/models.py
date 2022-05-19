@@ -38,6 +38,10 @@ class UserManager(BaseUserManager):
         return user
 
 
+# for RGPD & others reasons when a user is deleted one want to keep anonymized data
+
+
+
 class User(AbstractBaseUser, PermissionsMixin):
 
     # We also need a way to contact the user and a way for the user to identify
