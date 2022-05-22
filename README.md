@@ -133,11 +133,11 @@ If `SECRET_KEY` is not present in the `.env`, _decouple_ will raise an `Undefine
 
 ### Mesures OWASP
 ### Conformité RGPG
-### Crédits
+### Crédits et lectures intérestantes
 
 Openclassrooms, bien-sur et surtout le discord DA Python!
 
-Les documentations officielles Django et DRF ; Confucuis aurait dit "une image vaut mille mots" ;-)
+Les documentations officielles Django et DRF ; Confucius aurait dit "une image vaut mille mots" ;-)
 
 Vitor Freitas pour les choix d'extension du modèle utilisateur sous la forme d'un questionnaire "fonctionnalités recherchées":
 [How to Extend Django User Model](https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html#proxy)
@@ -149,3 +149,6 @@ Gutsytechster pour son introduction aux opérations d'Authentification dans DRF.
 
 [User Auth operations in DRF – Login, Logout, Register, Change Password – Curiosity never ends](https://gutsytechster.wordpress.com/2019/11/12/user-auth-operations-in-drf-login-logout-register-change-password/)
 
+J.V. Zammit @untangled.dev pour son 'explicatif' guide : [A minimal Django testing style guide](https://www.untangled.dev/2021/08/22/django-testing-style-guide/)
+
+Lacey Williams Henschel for her great series about and more precisely [What You Should Know About DRF, Part 1: ModelViewSet attributes and methods — Lacey Williams Henschel](https://www.laceyhenschel.com/blog/2021/2/22/what-you-should-know-about-drf-part-1-modelviewset-attributes-and-methods)
