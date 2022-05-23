@@ -35,6 +35,9 @@ class Project(models.Model):
                             default=FRONT,
                             )
 
+    def __str__(self):
+        return title
+
 
 class Issue(models.Model):
 
@@ -99,6 +102,10 @@ class Issue(models.Model):
     # A timestamp representing when this object was created.
     created_time = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return title
+
+
 
 class Comment(models.Model):
 
@@ -112,6 +119,8 @@ class Comment(models.Model):
     # A timestamp representing when this object was created.
     created_time = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return description
 
 class Contributor(models.Model):
     CREATE = 'C'
@@ -148,3 +157,9 @@ class Contributor(models.Model):
         choices=PROJECT_PERMISSION_CHOICES,
         default=READ,
     )
+
+    class Meta:
+        models.UniqueConstraint(fields=['user', 'project', 'role'], name='unique__role__for__user__in_project')
+
+        def __str__(self):
+            return str(user.email) + (project.title) + role
