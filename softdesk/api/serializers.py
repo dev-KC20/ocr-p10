@@ -1,17 +1,32 @@
-from rest_framework.serializers import ModelSerializer, CharField, PrimaryKeyRelatedField
+from rest_framework.serializers import ModelSerializer, CharField, SlugRelatedField,StringRelatedField
 
 from .models import Project, Issue, Comment, Contributor
 
-from django.contrib.auth import get_user_model
-User = get_user_model()
+# from django.contrib.auth import get_user_model
+
+# User = get_user_model()
+
+
+class ContributorSerializer(ModelSerializer):
+    
+    class Meta:
+        model = Contributor
+        fields = [
+                  "user",
+                  "project",
+                  "role",
+                  "permission", ]
 
 
 class ProjectSerializer(ModelSerializer):
 
+    contributors = ContributorSerializer(source='contributor_project', many=True, read_only=True)
+    # contributors = ContributorSerializer(many=True, read_only=True)
+
     class Meta:
         model = Project
-        fields = ["author_users", "title", "description", "type"]
-        read_only_fields = ['author_users']
+        fields = ["author_users", "title", "description", "type", "contributors"]
+        read_only_fields = ['author_users', 'contributors']
 
     def create(self, validated_data):
         # create project instance w/o request user
@@ -28,6 +43,10 @@ class ProjectSerializer(ModelSerializer):
         project.save()
         return project
 
+    # def get_contributors(self, instance):
+    #     queryset = instance.contributors.all()
+    #     serializer = ContributorSerializer(queryset, many=True)
+    #     return serializer.data
 
 class IssueSerializer(ModelSerializer):
     class Meta:
@@ -50,12 +69,3 @@ class CommentSerializer(ModelSerializer):
                   "author_user",
                   "description",
                   "created_time", ]
-
-
-class ContributorSerializer(ModelSerializer):
-    class Meta:
-        model = Contributor
-        fields = ["user",
-                  "project",
-                  "role",
-                  "permission", ]

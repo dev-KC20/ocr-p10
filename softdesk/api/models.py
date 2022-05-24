@@ -24,7 +24,10 @@ class Project(models.Model):
     author_users = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='project_owner', blank=True, null=True,
                                      on_delete=models.SET(get_sentinel_user),)
     # list of the members of the projets is held in external Contributor model
-    contributors = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Contributor', )
+    contributors = models.ManyToManyField(settings.AUTH_USER_MODEL,
+                                          through='Contributor',
+                                        #   through_fields=('project', 'user'),
+                                           )
     # How you qualify its this project
     title = models.CharField(max_length=48, blank=False, null=False)
     # How you describe what this project is
@@ -145,9 +148,12 @@ class Contributor(models.Model):
     ]
 
     # if the user gets deleted then contributor becomes 'sentinel_user' named here deleted
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,  on_delete=models.SET(get_sentinel_user),)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, to_field='id', related_name="contributor_user",
+                             blank=True, null=True,  on_delete=models.SET(get_sentinel_user),)
     # if the project gets deleted then delete Contributor
-    project = models.ForeignKey(Project,  on_delete=models.CASCADE, null=True)
+    project = models.ForeignKey(Project, to_field='id', related_name="contributor_project",
+                                on_delete=models.CASCADE, null=True)
+
     role = models.CharField(
         max_length=1,
         choices=PROJECT_ROLE_CHOICES,
@@ -160,7 +166,7 @@ class Contributor(models.Model):
     )
 
     class Meta:
-        models.UniqueConstraint(fields=['user', 'project', 'role'], name='unique__role__for__user__in_project')
+        models.UniqueConstraint(fields=['user', 'project', ], name='unique__role__for__user__in_project')
 
     def __str__(self):
         return str(self.user.email) + (self.project.title) + self.role
