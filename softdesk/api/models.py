@@ -2,12 +2,9 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-# from users.models import User
-
-# for RGPD & others reasons when a contributor is deleted one want to keep projects, issues or comments
-
 
 def get_sentinel_user():
+    # for RGPD & others reasons when a contributor is deleted one want to keep projects, issues or comments
     return get_user_model().objects.get_or_create(username='deletedUser')[0]
 
 
@@ -23,7 +20,11 @@ class Project(models.Model):
         (IOS, 'IOS'),
         (ANDROID, 'Android'),
     ]
-    author_users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Contributor', )
+    # author is the owner of the project
+    author_users = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='project_owner', blank=True, null=True,
+                                     on_delete=models.SET(get_sentinel_user),)
+    # list of the members of the projets is held in external Contributor model
+    contributors = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Contributor', )
     # How you qualify its this project
     title = models.CharField(max_length=48, blank=False, null=False)
     # How you describe what this project is
@@ -36,7 +37,7 @@ class Project(models.Model):
                             )
 
     def __str__(self):
-        return title
+        return self.title
 
 
 class Issue(models.Model):
@@ -103,8 +104,7 @@ class Issue(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return title
-
+        return self.title
 
 
 class Comment(models.Model):
@@ -120,25 +120,26 @@ class Comment(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return description
+        return self.description
+
 
 class Contributor(models.Model):
+    # so far only 4 combinations of basic CRUD rights
     CREATE = 'C'
     READ = 'R'
-    UPDATE = 'U'
-    DELETE = 'D'
+    CREATE_READ = 'CR'
+    CREATE_READ_UPDATE_DELETE = 'CRUD'
     PROJECT_PERMISSION_CHOICES = [
         (CREATE, 'Créer'),
         (READ, 'Lire'),
-        (UPDATE, 'Actualiser'),
-        (DELETE, 'Supprimer'),
+        (CREATE_READ, 'Créer et Lire'),
+        (CREATE_READ_UPDATE_DELETE, 'Créer, Lire, Actualiser, Supprimer'),
     ]
-    OWNER = 'O'
+
+    # a project owner is a project author
     AUTHOR = 'A'
     MEMBER = 'M'
-
     PROJECT_ROLE_CHOICES = [
-        (OWNER, 'Responsable'),
         (AUTHOR, 'Auteur'),
         (MEMBER, 'Membre'),
     ]
@@ -153,13 +154,13 @@ class Contributor(models.Model):
         default=MEMBER,
     )
     permission = models.CharField(
-        max_length=1,
+        max_length=4,
         choices=PROJECT_PERMISSION_CHOICES,
-        default=READ,
+        default=CREATE,
     )
 
     class Meta:
         models.UniqueConstraint(fields=['user', 'project', 'role'], name='unique__role__for__user__in_project')
 
-        def __str__(self):
-            return str(user.email) + (project.title) + role
+    def __str__(self):
+        return str(self.user.email) + (self.project.title) + self.role

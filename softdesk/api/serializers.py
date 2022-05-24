@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, CharField, PrimaryKeyRelatedField
 
 from .models import Project, Issue, Comment, Contributor
 
@@ -7,9 +7,26 @@ User = get_user_model()
 
 
 class ProjectSerializer(ModelSerializer):
+
     class Meta:
         model = Project
-        fields = ["author_users", "title", "description", "type", "author"]
+        fields = ["author_users", "title", "description", "type"]
+        read_only_fields = ['author_users']
+
+    def create(self, validated_data):
+        # create project instance w/o request user
+        project = Project.objects.create(**validated_data)
+        # get & update user fields with request user
+        project.author_users = self.context['request'].user
+        # manage the external relation btw project & members, here the owner
+        Contributor.objects.create(
+            user=project.author_users,
+            project=project,
+            role=Contributor.AUTHOR,
+            permission=Contributor.CREATE_READ_UPDATE_DELETE
+        )
+        project.save()
+        return project
 
 
 class IssueSerializer(ModelSerializer):
