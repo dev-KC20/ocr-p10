@@ -21,7 +21,6 @@ class ContributorSerializer(ModelSerializer):
 class ProjectSerializer(ModelSerializer):
 
     contributors = ContributorSerializer(source='contributor_project', many=True, read_only=True)
-    # contributors = ContributorSerializer(many=True, read_only=True)
 
     class Meta:
         model = Project
