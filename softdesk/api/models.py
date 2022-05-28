@@ -159,6 +159,7 @@ class Contributor(models.Model):
         choices=PROJECT_ROLE_CHOICES,
         default=MEMBER,
     )
+    # the permission field is more for information than driving the api rights behavior
     permission = models.CharField(
         max_length=4,
         choices=PROJECT_PERMISSION_CHOICES,

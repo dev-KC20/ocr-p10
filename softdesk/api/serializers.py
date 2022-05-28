@@ -1,10 +1,6 @@
 from rest_framework.serializers import ModelSerializer, CharField, SlugRelatedField,StringRelatedField
-
 from .models import Project, Issue, Comment, Contributor
 
-# from django.contrib.auth import get_user_model
-
-# User = get_user_model()
 
 
 class ContributorSerializer(ModelSerializer):
