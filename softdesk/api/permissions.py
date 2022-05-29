@@ -26,15 +26,15 @@ class ContributorReadCreateAuthorUpdateDelete(BasePermission):
     read_methods = ["GET"]
 
     def has_permission(self, request, view):
-        print('here check againts view')
+        print('rights checked against view:', view)
 
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
         # here the request.user.is_authenticated
-        print('here check againts object')
+        print('permissions checked against object:', obj)
         # hence check if request.user is contributor
-        print('has_object_permission, check contributor')
+        print('check if contributor')
         if obj.pk:
             current_obj_id = obj.pk
             if isinstance(obj, Project):
@@ -50,7 +50,7 @@ class ContributorReadCreateAuthorUpdateDelete(BasePermission):
                 level = 'Comment'
                 print("prj id", level, project_id)
             project_members = Contributor.objects.filter(project=project_id)
-            print('Members',project_members)
+            print('Members', project_members)
 
         # let superuser be superuser == have full access
         if request.user.is_superuser:
