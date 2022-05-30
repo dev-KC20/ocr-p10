@@ -2,10 +2,15 @@ from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
 from .serializers import ProjectSerializer, ContributorSerializer
 from .models import Project, Contributor
 from .permissions import ContributorReadCreateAuthorUpdateDelete
+from django.urls import resolve
+from django.shortcuts import get_object_or_404
+
 
 User = get_user_model()
 
@@ -29,25 +34,49 @@ class ContributorViewSet(ModelViewSet):
     permission_classes = [ContributorReadCreateAuthorUpdateDelete]
 
     def get_queryset(self):
-        # filter the shown project to members only
-        project_id = self.kwargs.get('project_id')
-        print('get_queryset project_id:', project_id)
-        if project_id:
+        # filter the url shown project to members only
+        print('get_queryset kwargs:', self.kwargs)
+        project_id = self.kwargs.get('project_pk')
+        contributor_pk = self.kwargs.get('pk')
+        print('get_queryset kwargs project/users:', project_id, contributor_pk)
+        if contributor_pk and project_id:
+            # queryset = super().get_queryset().filter(project=project_id, user=contributor_pk)
+            queryset = Contributor.objects.filter(project=project_id, user_id=contributor_pk)
+            print('get_queryset pk:', queryset)
+            self.kwargs['pk'] = queryset.values_list('id')[0][0]
+            print('get_queryset kwargs:', self.kwargs)
+        elif project_id:
+            queryset = Contributor.objects.filter(project=project_id)
+            print('get_queryset project:', queryset)
 
-            ContributorsQueryset = Contributor.objects.filter(project=project_id, user=self.request.user)
-        print('filter members only, user:', self.request.user, ContributorsQueryset)
-        return ContributorsQueryset
+        return queryset
+
+    def destroy(self, request, *args, **kwargs):
+        print('retrieve kwargs:', self.kwargs)
+        contributor_to_delete = get_object_or_404(self.get_queryset())
+        self.check_object_permissions(self.request, contributor_to_delete)
+        self.perform_destroy(contributor_to_delete)
+        message = 'The contributor was successfully removed from project '
+        return Response({'message': message}, status=status.HTTP_204_NO_CONTENT)
+
+    def retrieve(self, request, *args, **kwargs):
+        print('retrieve kwargs:', self.kwargs)
+        contributor = get_object_or_404(self.get_queryset())
+        serializer = ContributorSerializer(contributor)
+        return Response(serializer.data)
 
     def perform_create(self, serializer, *args, **kwargs):
         # body of target data to be created
         create_data = self.request.data
-        # print('create contributor data: ', create_data)
+        print('create contributor data: ', create_data)
         target_project_id = create_data['project']
         target_user_id = create_data['user']
         # current project in the url
-        project_id = self.kwargs.get('project_id')
+        project_id = self.kwargs.get('project_pk')
+        print('create contributor url: ', self.kwargs, project_id, target_project_id)
         # owasp : do not temper with project in the data
-        if project_id != target_project_id:
+        if not(int(project_id) == int(target_project_id)):
+            print('nothing to do here')
             error_message = f"you are not allowed to work with project {target_project_id}, pls select: {project_id}"
             raise ValidationError(error_message)
         # get the author from Project rather than from Contributor

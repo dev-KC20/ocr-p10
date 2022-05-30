@@ -38,10 +38,6 @@ class ProjectSerializer(ModelSerializer):
         project.save()
         return project
 
-    # def get_contributors(self, instance):
-    #     queryset = instance.contributors.all()
-    #     serializer = ContributorSerializer(queryset, many=True)
-    #     return serializer.data
 
 class IssueSerializer(ModelSerializer):
     class Meta:

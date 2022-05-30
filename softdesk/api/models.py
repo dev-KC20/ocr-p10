@@ -167,7 +167,7 @@ class Contributor(models.Model):
     )
 
     class Meta:
-        models.UniqueConstraint(fields=['user', 'project', ], name='unique__role__for__user__in_project')
+        models.UniqueConstraint(fields=['user', 'project', ], name='user__once__in_project')
 
     def __str__(self):
-        return str(self.user.email) + (self.project.title) + self.role
+        return str(self.user.email) + ' on '  + (self.project.title)+ ' as '  + self.role

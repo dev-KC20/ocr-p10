@@ -32,33 +32,46 @@ class ContributorReadCreateAuthorUpdateDelete(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # here the request.user.is_authenticated
+
+        # lookup section
         print('permissions checked against object:', obj)
         # hence check if request.user is contributor
         print('check if contributor')
+        if view.kwargs.get('project_pk'):
+            print('obj permissions kwargs:', view.kwargs)
+            # non project level objects have url embeded with a project 
+            current_project_id = view.kwargs.get('project_pk')  
         if obj.pk:
-            current_obj_id = obj.pk
-            if isinstance(obj, Project):
-                project_id = current_obj_id
-                level = 'Project'
-                print("project id", level, project_id)
-            if isinstance(obj, Issue):
-                project_id = Issue.objects.get(pk=current_obj_id).project
-                print("prj id", level, project_id)
-                level = 'Issue'
-            if isinstance(obj, Comment):
-                project_id = Comment.objects.select_related(issue).get(pk=current_obj_id)
-                level = 'Comment'
-                print("prj id", level, project_id)
-            project_members = Contributor.objects.filter(project=project_id)
+            current_obj_pk = obj.pk
+        # these prints are for console debug ; not a business requirement
+        if isinstance(obj, Project) :
+            level = 'Project'
+            if not view.kwargs.get('project_pk'):
+                current_project_id = current_obj_pk
+            print("project id", level, current_project_id)
+            project_members = Contributor.objects.filter(project=current_project_id)
             print('Members', project_members)
-
+        # if isinstance(obj, Issue) and current_obj_pk:
+        #     issue = Issue.objects.get(pk=current_obj_pk)
+        #     level = 'Issue'
+        #     print("prj id", level, current_project_id, current_obj_pk )
+        # if isinstance(obj, Comment) and current_obj_pk:
+        #     comment = Comment.objects.get(pk=current_obj_pk)
+        #     level = 'Comment'
+        #     print("prj id", level, current_project_id ,issue, current_obj_pk)
+            
+        
+        # authorise section
         # let superuser be superuser == have full access
         if request.user.is_superuser:
             return bool(request.user and request.user.is_superuser)
         # only the owner of one object is permitted ti Update or Delete it
         if request.method in self.edit_delete_methods:
             print("edit_delete_methods for: ", request.method, 'author: ', request.user)
-            return obj.author_user == request.user
+            if isinstance(obj, Contributor):
+                return True
+            else: 
+                return obj.author_user == request.user
         elif request.method in self.create_methods:
             print("create_methods for: ", request.method, 'author: ', request.user)
             # authenticated user is allowed to create a new project
@@ -67,6 +80,7 @@ class ContributorReadCreateAuthorUpdateDelete(BasePermission):
                 # and 'pk' not in view.kwargs:
                 return True
             else:
+                # :TODO: check if usefull & act True or False
                 # Contributor is allowed to create Issues or Comments
                 # check if the autor_user is contributor
                 print("action: ", request.method, " not Project: ", obj, 'author: ', request.user)
