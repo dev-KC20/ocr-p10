@@ -43,12 +43,11 @@ class ContributorReadCreateAuthorUpdateDelete(BasePermission):
             current_project_id = view.kwargs.get('project_pk')
         if obj.pk:
             current_obj_pk = obj.pk
-        # these prints are for console debug ; not a business requirement
-        if isinstance(obj, Project):
-            level = 'Project'
+        # get the member list for the current project
+        if isinstance(obj, Project) or isinstance(obj, Issue) or isinstance(obj, Comment):
             if not view.kwargs.get('project_pk'):
                 current_project_id = current_obj_pk
-            print("project id", level, current_project_id)
+            print("project id",  current_project_id)
             project_members = Contributor.objects.filter(project=current_project_id)
             print('Members', project_members)
         # if isinstance(obj, Issue) and current_obj_pk:
