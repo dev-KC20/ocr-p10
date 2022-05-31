@@ -39,12 +39,12 @@ class ContributorReadCreateAuthorUpdateDelete(BasePermission):
         print('check if contributor')
         if view.kwargs.get('project_pk'):
             print('obj permissions kwargs:', view.kwargs)
-            # non project level objects have url embeded with a project 
-            current_project_id = view.kwargs.get('project_pk')  
+            # non project level objects have url embeded with a project
+            current_project_id = view.kwargs.get('project_pk')
         if obj.pk:
             current_obj_pk = obj.pk
         # these prints are for console debug ; not a business requirement
-        if isinstance(obj, Project) :
+        if isinstance(obj, Project):
             level = 'Project'
             if not view.kwargs.get('project_pk'):
                 current_project_id = current_obj_pk
@@ -59,18 +59,18 @@ class ContributorReadCreateAuthorUpdateDelete(BasePermission):
         #     comment = Comment.objects.get(pk=current_obj_pk)
         #     level = 'Comment'
         #     print("prj id", level, current_project_id ,issue, current_obj_pk)
-            
-        
+
         # authorise section
         # let superuser be superuser == have full access
         if request.user.is_superuser:
             return bool(request.user and request.user.is_superuser)
         # only the owner of one object is permitted ti Update or Delete it
         if request.method in self.edit_delete_methods:
-            print("edit_delete_methods for: ", request.method, 'author: ', request.user)
+            print("edit_delete_methods for: ", request.method, 'author: ',
+                  obj.author_user, 'current user', request.user)
             if isinstance(obj, Contributor):
                 return True
-            else: 
+            else:
                 return obj.author_user == request.user
         elif request.method in self.create_methods:
             print("create_methods for: ", request.method, 'author: ', request.user)
