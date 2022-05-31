@@ -190,7 +190,7 @@ class CommentViewSet(ModelViewSet):
     def perform_create(self, serializer, *args, **kwargs):
         # body of target data to be created
         create_data = self.request.data
-        print('create issue data: ', create_data)
+        print('create comment data: ', create_data)
         target_issue_id = create_data['issue']
         target_author_id = int(create_data['author_user'])
         # current project in the url
@@ -216,16 +216,31 @@ class CommentViewSet(ModelViewSet):
         super().perform_create(serializer, *args, **kwargs)
         print(f"comment added to issue {target_issue_id}!")
 
-    # def destroy(self, request, *args, **kwargs):
-    #     print('retrieve kwargs:', self.kwargs)
-    #     contributor_to_delete = get_object_or_404(self.get_queryset())
-    #     self.check_object_permissions(self.request, contributor_to_delete)
-    #     self.perform_destroy(contributor_to_delete)
-    #     message = 'The contributor was successfully removed from project '
-    #     return Response({'message': message}, status=status.HTTP_204_NO_CONTENT)
+    def perform_update(self, serializer, *args, **kwargs):
+        create_data = self.request.data
+        print('update comment data: ', create_data)
+        target_issue_id = create_data['issue']
+        target_author_id = int(create_data['author_user'])
+        # current project in the url
+        project_id = self.kwargs.get('project_pk')
+        issue_id = self.kwargs.get('issue_pk')
+        comment_pk = self.kwargs.get('pk')
+        print('update comment url: ', self.kwargs, project_id, issue_id, comment_pk)
+        # the logged user needs to be member of the project
+        if not Contributor.objects.filter(project_id=project_id, user_id=self.request.user).exists():
+            error_message = f"You, user {self.request.user} need to be member of project {project_id}, pls work with your projects."
+            raise ValidationError(error_message)
+        # owasp : do not temper with issue in the data
+        if not(int(issue_id) == int(target_issue_id)):
+            error_message = f"you are not allowed to comment on issue {target_issue_id}, pls select: {issue_id}"
+            raise ValidationError(error_message)
+        # # owasp : do not temper with comment in the data
+        # if not(int(comment_pk) == int(target_comment_pk)):
+        #     error_message = f"you are not allowed to update comment {target_comment_pk}, pls select: {comment_pk}"
+        #     raise ValidationError(error_message)
+        # the author_user must be the logged user
+        if not(target_author_id == self.request.user.id):
+            error_message = f"You {self.request.user} can't change the author_user by so else, pls put your user id as author back."
+            raise ValidationError(error_message)
 
-    # def retrieve(self, request, *args, **kwargs):
-    #     print('retrieve kwargs:', self.kwargs)
-    #     contributor = get_object_or_404(self.get_queryset())
-    #     serializer = ContributorSerializer(contributor)
-    #     return Response(serializer.data)
+        super().perform_update(serializer, *args, **kwargs)
