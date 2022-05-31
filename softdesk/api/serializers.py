@@ -1,13 +1,12 @@
-from rest_framework.serializers import ModelSerializer, CharField, SlugRelatedField,StringRelatedField
+from rest_framework.serializers import ModelSerializer, CharField, SlugRelatedField, StringRelatedField
 from .models import Project, Issue, Comment, Contributor
 
 
-
 class ContributorSerializer(ModelSerializer):
-    
+
     class Meta:
         model = Contributor
-        fields = [
+        fields = ["id",
                   "user",
                   "project",
                   "role",
@@ -20,17 +19,17 @@ class ProjectSerializer(ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ["author_users", "title", "description", "type", "contributors"]
-        read_only_fields = ['author_users', 'contributors']
+        fields = ["id", "author_user", "title", "description", "type", "contributors"]
+        read_only_fields = ['author_user', 'contributors']
 
     def create(self, validated_data):
         # create project instance w/o request user
         project = Project.objects.create(**validated_data)
         # get & update user fields with request user
-        project.author_users = self.context['request'].user
+        project.author_user = self.context['request'].user
         # manage the external relation btw project & members, here the owner
         Contributor.objects.create(
-            user=project.author_users,
+            user=project.author_user,
             project=project,
             role=Contributor.AUTHOR,
             permission=Contributor.CREATE_READ_UPDATE_DELETE
@@ -42,7 +41,8 @@ class ProjectSerializer(ModelSerializer):
 class IssueSerializer(ModelSerializer):
     class Meta:
         model = Issue
-        fields = ["project",
+        fields = ["id",
+                  "project",
                   "author_user",
                   "assignee_user",
                   "title",
@@ -56,7 +56,8 @@ class IssueSerializer(ModelSerializer):
 class CommentSerializer(ModelSerializer):
     class Meta:
         model = Comment
-        fields = ["issue",
+        fields = ["id",
+                  "issue",
                   "author_user",
                   "description",
                   "created_time", ]
