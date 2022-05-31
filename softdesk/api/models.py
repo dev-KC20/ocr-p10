@@ -21,7 +21,7 @@ class Project(models.Model):
         (ANDROID, 'Android'),
     ]
     # author is the owner of the project
-    author_users = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='project_owner', blank=True, null=True,
+    author_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='project_owner', blank=True, null=True,
                                      on_delete=models.SET(get_sentinel_user),)
     # list of the members of the projets is held in external Contributor model
     contributors = models.ManyToManyField(settings.AUTH_USER_MODEL,

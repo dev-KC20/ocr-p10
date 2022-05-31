@@ -2,13 +2,14 @@
 from django.urls import path, include
 # from rest_framework import routers
 from rest_framework_nested import routers
-from .views import ProjectViewSet, ContributorViewSet
+from .views import ProjectViewSet, ContributorViewSet, IssueViewSet
 
 router = routers.SimpleRouter()
 router.register('projects', ProjectViewSet, basename='projects')
 
 project_router = routers.NestedSimpleRouter(router, r'projects', lookup='project')
 project_router.register('users', ContributorViewSet, basename='users')
+project_router.register('issues', IssueViewSet, basename='issues')
 
 # contributor_list = ContributorViewSet.as_view({
 #     'get': 'list',
