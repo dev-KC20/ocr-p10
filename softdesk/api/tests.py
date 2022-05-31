@@ -1,10 +1,12 @@
-# not passing and spending too much time while no great knowledge on APITest
-# renamed
 from django.urls import reverse_lazy, reverse, path, include
+from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework.test import APITestCase, URLPatternsTestCase
+from rest_framework.test import APITestCase, URLPatternsTestCase, APIClient
 
-from .models import Project
+from .models import Project, Contributor
+
+
+User = get_user_model()
 
 
 class ApiAPITestCase(APITestCase):
@@ -15,6 +17,51 @@ class ApiAPITestCase(APITestCase):
 
 
 class TestProject(ApiAPITestCase):
+
+    def setUp(self):
+        email = "usertest@mail.fr"
+        password = "password-oc"
+        self.user = User.objects.create_user(email, password)
+
+        jwt_fetch_data = {
+            'email': email,
+            'password': password
+        }
+
+        url = reverse('login')
+        response = self.client.post(url, jwt_fetch_data, format='json')
+        self.token = response.data['access']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
+    def test_jwt_signup(self):
+
+        url = reverse('signup')
+
+        # signup user pass
+        response = self.client.post(url, {'email': 'usertest2@mail.fr', 'password': 'pass'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # signup same user fails
+        response = self.client.post(url, {'email': 'usertest2@mail.fr', 'password': 'pass'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_jwt_login(self):
+
+        url = reverse('login')
+        response = self.client.post(url, {'email': 'usertest@mail.fr', 'password': 'password-oc'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue('access' in response.data)
+
+    def test_jwt_bearer_credentials(self):
+
+        verification_url = '/api/v1/projects/'
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + 'abc')
+        response = self.client.get(verification_url, data={'format': 'json'})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.token)
+        response = self.client.get(verification_url, data={'format': 'json'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_get_can_read_project_list(self):
         url = reverse('projects-list')
@@ -38,38 +85,17 @@ class TestProject(ApiAPITestCase):
         # create first to know existing pk to then update
         newly_created_project = Project.objects.create(title="Second Test Project",
                                                        description=" Long description of second test project",
-                                                       type="F",)
-        print('pk of newly created project: ', newly_created_project.pk)
-        url = reverse('projects-detail',kwargs=({'pk': newly_created_project.pk}))
+                                                       type="F", author_user=self.user)
+        manually_created_contributor = Contributor.objects.create(user=self.user,
+                                                                  project=newly_created_project,
+                                                                  role=Contributor.AUTHOR,
+                                                                  permission=Contributor.CREATE_READ_UPDATE_DELETE)
+        url = reverse('projects-detail', kwargs=({'pk': newly_created_project.pk}))
         # url = '/api/v1/projects/1/'
-        print('reversed url of project to be modified: ', url )
         data = {
             "title": "Second Test Project updated",
             "description": " Long description of second updated test project",
-            "type": "B",
+            "type": "B"
         }
         response = self.client.put(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    # def get_project_detail_data(self, projects):
-    #     return [
-    #         {
-    #             'id': project.pk,
-    #             'title': project.title,
-    #             'type': project.type,
-    #         } for project in projects
-    #     ]
-    # def test_list(self):
-    #     self.assertEqual(response.status_code, 200)
-        # self.assertEqual(self.get_project_detail_data([self.project, self.project_2]), response.json())
-
-    # def test_create(self):
-    #     project_count = Project.objects.count()
-    #     response = self.client.post(reverse('projects-list'), data={'title': 'Nouvelle catégorie', 'type': 'A'})
-    #     self.assertEqual(response.status_code, 405)
-    #     self.assertEqual(Project.objects.count(), project_count)
-
-    # def test_delete(self):
-    #     response = self.client.delete(reverse('projects-list', kwargs={'pk': self.project.pk}))
-    #     self.assertEqual(response.status_code, 405)
-    #     self.project.refresh_from_db()

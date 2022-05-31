@@ -22,9 +22,7 @@ class ProjectViewSet(ModelViewSet):
 
     def get_queryset(self):
         # filter the shown project to members only
-        # Project.objects.filter(contributor__user=self.request.user)
         project_contributed_to = Contributor.objects.filter(user=self.request.user).values_list('project_id')
-        print('filter project to members only, user:', self.request.user, project_contributed_to)
         return Project.objects.filter(id__in=project_contributed_to)
 
 
@@ -35,24 +33,17 @@ class ContributorViewSet(ModelViewSet):
 
     def get_queryset(self):
         # filter the url shown project to members only
-        print('get_queryset kwargs:', self.kwargs)
         project_id = self.kwargs.get('project_pk')
         contributor_pk = self.kwargs.get('pk')
-        print('get_queryset kwargs project/users:', project_id, contributor_pk)
         if contributor_pk and project_id:
             # queryset = super().get_queryset().filter(project=project_id, user=contributor_pk)
             queryset = Contributor.objects.filter(project=project_id, user_id=contributor_pk)
-            print('get_queryset pk:', queryset)
             self.kwargs['pk'] = queryset.values_list('id')[0][0]
-            print('get_queryset kwargs:', self.kwargs)
         elif project_id:
             queryset = Contributor.objects.filter(project=project_id)
-            print('get_queryset project:', queryset)
-
         return queryset
 
     def destroy(self, request, *args, **kwargs):
-        print('retrieve kwargs:', self.kwargs)
         contributor_to_delete = get_object_or_404(self.get_queryset())
         self.check_object_permissions(self.request, contributor_to_delete)
         self.perform_destroy(contributor_to_delete)
@@ -60,7 +51,6 @@ class ContributorViewSet(ModelViewSet):
         return Response({'message': message}, status=status.HTTP_204_NO_CONTENT)
 
     def retrieve(self, request, *args, **kwargs):
-        print('retrieve kwargs:', self.kwargs)
         contributor = get_object_or_404(self.get_queryset())
         serializer = ContributorSerializer(contributor)
         return Response(serializer.data)
@@ -68,15 +58,12 @@ class ContributorViewSet(ModelViewSet):
     def perform_create(self, serializer, *args, **kwargs):
         # body of target data to be created
         create_data = self.request.data
-        print('create contributor data: ', create_data)
         target_project_id = create_data['project']
         target_user_id = create_data['user']
         # current project in the url
         project_id = self.kwargs.get('project_pk')
-        print('create contributor url: ', self.kwargs, project_id, target_project_id)
         # owasp : do not temper with project in the data
         if not(int(project_id) == int(target_project_id)):
-            print('nothing to do here')
             error_message = f"you are not allowed to work with project {target_project_id}, pls select: {project_id}"
             raise ValidationError(error_message)
         # get the author from Project rather than from Contributor
@@ -93,7 +80,6 @@ class ContributorViewSet(ModelViewSet):
 
         serializer.save(user=target_user, project_id=target_project_id, role=Contributor.MEMBER,
                         permission=Contributor.CREATE_READ)
-        print(f"user {target_user_id} added to project {target_project_id}!")
 
 
 class IssueViewSet(ModelViewSet):
@@ -103,31 +89,23 @@ class IssueViewSet(ModelViewSet):
 
     def get_queryset(self):
         # filter the url shown project to members only
-        print('get_queryset kwargs:', self.kwargs)
         project_id = self.kwargs.get('project_pk')
         issue_pk = self.kwargs.get('pk')
-        print('get_queryset kwargs project/issues:', project_id, issue_pk)
         if issue_pk and project_id:
             queryset = Issue.objects.filter(project=project_id, id=issue_pk)
-            print('get_queryset pk:', queryset)
             self.kwargs['pk'] = queryset.values_list('id')[0][0]
-            print('get_queryset kwargs:', self.kwargs)
         elif project_id:
             queryset = Issue.objects.filter(project=project_id)
-            print('get_queryset project:', queryset)
-
         return queryset
 
     def perform_create(self, serializer, *args, **kwargs):
         # body of target data to be created
         create_data = self.request.data
-        print('create issue data: ', create_data)
         target_project_id = create_data['project']
         target_author_id = create_data['author_user']
         target_assignee_id = create_data['assignee_user']
         # current project in the url
         project_id = self.kwargs.get('project_pk')
-        print('create issue url: ', self.kwargs, project_id, target_project_id)
         # the logged user needs to be member of the project
         if not Contributor.objects.filter(project_id=target_project_id, user_id=self.request.user).exists():
             error_message = f"You, user {self.request.user} need to be member of project {target_project_id}, pls work with your projects."
@@ -135,7 +113,6 @@ class IssueViewSet(ModelViewSet):
 
         # owasp : do not temper with project in the data
         if not(int(project_id) == int(target_project_id)):
-            print('nothing to do here')
             error_message = f"you are not allowed to work with project {target_project_id}, pls select: {project_id}"
             raise ValidationError(error_message)
 
@@ -149,7 +126,6 @@ class IssueViewSet(ModelViewSet):
             raise ValidationError(error_message)
 
         super().perform_create(serializer, *args, **kwargs)
-        print(f"issue added to project {target_project_id}!")
 
     # def destroy(self, request, *args, **kwargs):
     #     print('retrieve kwargs:', self.kwargs)
@@ -173,59 +149,46 @@ class CommentViewSet(ModelViewSet):
 
     def get_queryset(self):
         # filter the url shown project to members only
-        print('get_queryset kwargs:', self.kwargs)
         project_id = self.kwargs.get('project_pk')
         issue_id = self.kwargs.get('issue_pk')
         comment_pk = self.kwargs.get('pk')
-        print('get_queryset kwargs project/issues/comment:', project_id, issue_id, comment_pk)
         if issue_id and comment_pk:
             queryset = Comment.objects.filter(id=comment_pk)
-            print('get_queryset pk:', queryset)
         elif issue_id:
             queryset = Comment.objects.filter(issue_id=issue_id)
-            print('get_queryset project:', queryset)
-
         return queryset
 
     def perform_create(self, serializer, *args, **kwargs):
         # body of target data to be created
         create_data = self.request.data
-        print('create comment data: ', create_data)
         target_issue_id = create_data['issue']
         target_author_id = int(create_data['author_user'])
         # current project in the url
         project_id = self.kwargs.get('project_pk')
         issue_id = self.kwargs.get('issue_pk')
-        print('create comment url: ', self.kwargs, project_id, issue_id)
-        print('create targets: ', project_id, target_issue_id)
         # the logged user needs to be member of the project
         if not Contributor.objects.filter(project_id=project_id, user_id=self.request.user).exists():
             error_message = f"You, user {self.request.user} need to be member of project {project_id}, pls work with your projects."
             raise ValidationError(error_message)
         # owasp : do not temper with issue in the data
         if not(int(issue_id) == int(target_issue_id)):
-            print('nothing to do here')
             error_message = f"you are not allowed to comment on issue {target_issue_id}, pls select: {issue_id}"
             raise ValidationError(error_message)
         # the author_user must be the logged user
-        print('check user:', target_author_id, self.request.user.id)
         if not(target_author_id == self.request.user.id):
             error_message = f"You {self.request.user} can't change the author_user by so else, pls put your user id as author back."
             raise ValidationError(error_message)
 
         super().perform_create(serializer, *args, **kwargs)
-        print(f"comment added to issue {target_issue_id}!")
 
     def perform_update(self, serializer, *args, **kwargs):
         create_data = self.request.data
-        print('update comment data: ', create_data)
         target_issue_id = create_data['issue']
         target_author_id = int(create_data['author_user'])
         # current project in the url
         project_id = self.kwargs.get('project_pk')
         issue_id = self.kwargs.get('issue_pk')
         comment_pk = self.kwargs.get('pk')
-        print('update comment url: ', self.kwargs, project_id, issue_id, comment_pk)
         # the logged user needs to be member of the project
         if not Contributor.objects.filter(project_id=project_id, user_id=self.request.user).exists():
             error_message = f"You, user {self.request.user} need to be member of project {project_id}, pls work with your projects."
@@ -234,11 +197,7 @@ class CommentViewSet(ModelViewSet):
         if not(int(issue_id) == int(target_issue_id)):
             error_message = f"you are not allowed to comment on issue {target_issue_id}, pls select: {issue_id}"
             raise ValidationError(error_message)
-        # # owasp : do not temper with comment in the data
-        # if not(int(comment_pk) == int(target_comment_pk)):
-        #     error_message = f"you are not allowed to update comment {target_comment_pk}, pls select: {comment_pk}"
-        #     raise ValidationError(error_message)
-        # the author_user must be the logged user
+
         if not(target_author_id == self.request.user.id):
             error_message = f"You {self.request.user} can't change the author_user by so else, pls put your user id as author back."
             raise ValidationError(error_message)
