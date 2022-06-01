@@ -35,11 +35,13 @@ class ContributorViewSet(ModelViewSet):
         # filter the url shown project to members only
         project_id = self.kwargs.get('project_pk')
         contributor_pk = self.kwargs.get('pk')
+        # print('ContributorVS get_queryset, kwargs:',self.kwargs)
         if contributor_pk and project_id:
-            # due to url structure including users, this pk is a user_id not a contributor_id
-            queryset = Contributor.objects.filter(project=project_id, user_id=contributor_pk)
-            # we try to replace user_pk by contributor_pk 
-            # self.kwargs['pk'] = queryset.values_list('id')[0][0]
+            # due to url structure including users, this pk is not a user_id but a contributor_id
+            queryset = Contributor.objects.filter(project=project_id, id=contributor_pk)
+            # we try to replace user_pk by contributor_pk
+            if queryset:
+                self.kwargs['pk'] = queryset.values_list('id')[0][0]
         elif project_id:
             queryset = Contributor.objects.filter(project=project_id)
         return queryset
@@ -92,6 +94,7 @@ class IssueViewSet(ModelViewSet):
         # filter the url shown project to members only
         project_id = self.kwargs.get('project_pk')
         issue_pk = self.kwargs.get('pk')
+        # print('IssueVS get_queryset, kwargs:',self.kwargs)
         if issue_pk and project_id:
             queryset = Issue.objects.filter(project=project_id, id=issue_pk)
             # self.kwargs['pk'] = queryset.values_list('id')[0][0]
