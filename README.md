@@ -19,8 +19,8 @@ The additionnal code follows "CC BY-SA ".
   
 Développer le back-end d'une application de suivi des problèmes, basée sur la mise à disposition d'une API RESTful.
 
-* Une application de suivi des problèmes pour les trois plateformes (site web, applications Android et iOS).
 * L'application permettra essentiellement aux utilisateurs de créer divers projets, d'ajouter des utilisateurs à des projets spécifiques, de créer des problèmes au sein des projets et d'attribuer des libellés à ces problèmes en fonction de leurs priorités, de balises, etc.
+* Une application de suivi des problèmes pour les trois plateformes (site web, applications Android et iOS).
 * Les trois applications exploiteront les points de terminaison d'API qui serviront les données.
   
 ### Models
@@ -32,28 +32,6 @@ Les problèmes peuvent faire l'objet de **commentaires** de la part des contribu
 Remarque: Il est interdit à tout utilisateur autorisé autre que l'auteur d'émettre des requêtes d'actualisation et de suppression d'un problème/projet/commentaire.
 
 Un document répertorie les mesures de sécurité OWASP que le back-end devra respecter.
-
-## Fonctionnement du logiciel
-
-### Connexion à la plate-forme.
-
-### Création d'un projet.
-
-### Affectation d'utilisateur à un projet.
-
-### Fonctions CRUD de problème dans un projet.
-
-### Fonctions CRUD de commentaire à un problème.
-
-### Mesures de sécurité mises en place.
-
-### Documentation de l'API.
-
-
-
-
-
-
 
 
 ---
@@ -152,3 +130,114 @@ Gutsytechster pour son introduction aux opérations d'Authentification dans DRF.
 J.V. Zammit @untangled.dev pour son 'explicatif' guide : [A minimal Django testing style guide](https://www.untangled.dev/2021/08/22/django-testing-style-guide/)
 
 Lacey Williams Henschel for her great series about and more precisely [What You Should Know About DRF, Part 1: ModelViewSet attributes and methods — Lacey Williams Henschel](https://www.laceyhenschel.com/blog/2021/2/22/what-you-should-know-about-drf-part-1-modelviewset-attributes-and-methods)
+
+
+## Documentation de Softdesk API
+
+### Introduction
+
+The SoftDesk API enables your helpdesk team to support your projects thru:
+
+* reporting Issues on a per Project basis,
+* allocating these Issues to team members for fixing,
+* and collecting related Comments from other project members.
+
+A set of 19 end points are provided to interact with the front end solution of your choice.
+
+### Overview
+
+We could suggest the following workflow to support a project:
+
+1.    The user does log-in.
+2.    The user creates a new project
+3.    The user adds members to his project
+4.    When it occurs, the user creates an open issue & assign it to one of his project members
+5.    If needed he or any project member make comments about the issue
+6.    When the assignee has fixed the point, the project responsible closes the issue.
+
+The application structure includes basically 3 levels of embedded models : Project, Issues, Comments.
+
+For these, the basic CRUD methods are provided thru the available end-points.
+
+If you need a mock data set for testing purpose, here is what we suggest:
+
+|user/project| 1  |  2 |  3 |  4 | 5 |
+|------------|----|----|----|----|---|
+| 1.adminoc  |    | A  |    |    |   |
+| 2.JohnDoe  | A  |    | A  |  A |   |
+| 3.JaneSmith| (M)|    |    |    | A |
+
+(A)uthor ; (M)ember.
+
+We provide two series of test: one of the back-end side and one on the Postman client side.
+
+Fot the latter, remember when checking User permissions that "adminoc" is also the SoftDesk API superuser.
+In the Project direction, the tested (C)reate/(U)pdate/(R)etrieve Issue or Comment will be removed thru (D)elete.
+
+Our product is still under active developpement. Feel free to contact us for any questions or proposals of improvement.
+Authentication
+
+Only authenticated users can access the SoftDesk backend. In order to do so the user first needs to register by providing an email address. The same email with its associated password will be required to login at the back-end.
+
+We do not use the collected emails for any purpose. Therefore, the provided email could also be a fake one.
+
+SoftDesk API includes the Simple JWT package in order to provide JSON Web Token authentication. The current setting for the Token access and Token refresh life time are :
+
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+
+### Error Codes
+
+Successful status codes:
+```
+HTTP_200_OK
+HTTP_201_CREATED
+HTTP_202_ACCEPTED
+HTTP_203_NON_AUTHORITATIVE_INFORMATION
+HTTP_204_NO_CONTENT
+```
+
+
+Error status codes:
+```
+HTTP_400_BAD_REQUEST
+HTTP_401_UNAUTHORIZED
+HTTP_403_FORBIDDEN
+HTTP_404_NOT_FOUND
+HTTP_500_INTERNAL_SERVER_ERROR
+```
+
+### Rate limit
+
+No limits of request were set in version 1 of the SoftDesk API.
+
+
+### End Points description
+
+[softdesk_api](https://documenter.getpostman.com/view/19150435/Uz5DrdLm)
+
+
+## Tests passed
+
+### Postman Test 26/26
+
+![Postman 1/3](img/postman-test-1.png)  
+
+![Postman 2/3](img/postman-test-2.png)  
+
+![Postman 3/3](img/postman-test-3.png)  
+
+### Django ApiTestCase 6/6
+
+```bash
+python manage.py test
+Found 6 test(s).
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+......
+----------------------------------------------------------------------
+Ran 6 tests in 3.482s
+
+OK
+Destroying test database for alias 'default'...
+```
