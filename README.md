@@ -214,8 +214,9 @@ No limits of request were set in version 1 of the SoftDesk API.
 
 ### End Points description
 
-[softdesk_api](https://documenter.getpostman.com/view/19150435/Uz5DrdLm)
+[softdesk_api](https://documenter.getpostman.com/view/19150435/Uz5DrdLm)  
 
+![](img/APIEndPoints.png)  
 
 ## Tests passed
 
