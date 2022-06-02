@@ -19,7 +19,11 @@ class TestProject(ApiAPITestCase):
     def setUp(self):
         email = "usertest@mail.fr"
         password = "password-oc"
-        self.user = User.objects.create_user(email, password)
+        first_name = "johnny"
+        last_name = "Cash"
+        self.user = User.objects.create_user(
+            email=email, password=password, first_name=first_name, last_name=last_name
+        )
 
         jwt_fetch_data = {"email": email, "password": password}
 
