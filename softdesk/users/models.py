@@ -1,7 +1,4 @@
-from django.contrib.auth.models import (
-    BaseUserManager, AbstractBaseUser, PermissionsMixin
-)
-from django.conf import settings
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.db import models
 
 
@@ -14,7 +11,7 @@ class UserManager(BaseUserManager):
         """Create and return a `User` with an email and password."""
 
         if email is None:
-            raise TypeError('Users must have an email address.')
+            raise TypeError("Users must have an email address.")
 
         user = self.model(email=self.normalize_email(email), first_name=first_name, last_name=last_name)
         user.set_password(password)
@@ -27,10 +24,12 @@ class UserManager(BaseUserManager):
         Create and return a `User` with superuser (admin) permissions.
         """
         if password is None:
-            raise TypeError('Superusers must have a password.')
+            raise TypeError("Superusers must have a password.")
         user = self.create_user(
             email,
-            password=password, first_name=first_name, last_name=last_name,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
         )
         user.is_admin = True
         user.is_superuser = True
@@ -41,17 +40,13 @@ class UserManager(BaseUserManager):
 # for RGPD & others reasons when a user is deleted one want to keep anonymized data
 
 
-
 class User(AbstractBaseUser, PermissionsMixin):
 
     # We also need a way to contact the user and a way for the user to identify
     # themselves when logging in. Since we need an email address for contacting
     # the user anyways, we will also use the email for logging in because it is
     # the most common form of login credential at the time of writing.
-    email = models.EmailField(
-        verbose_name='email address',
-        max_length=255,
-        db_index=True, unique=True)
+    email = models.EmailField(verbose_name="email address", max_length=255, db_index=True, unique=True)
 
     # When a user no longer wishes to use our platform, they may try to delete
     # their account. That's a problem for us because the data we collect is
@@ -73,14 +68,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(auto_now=True)
 
     # More fields required by Django when specifying a custom user model.
-    first_name = models.CharField(max_length=50, blank=True, null=True)
-    last_name = models.CharField(max_length=50, blank=True, null=True)
-    
+    first_name = models.CharField(max_length=50, blank=True)
+    last_name = models.CharField(max_length=50, blank=True)
 
     # The `USERNAME_FIELD` property tells us which field we will use to log in.
     # In this case we want it to be the email field.
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name', ]
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = [
+        "first_name",
+        "last_name",
+    ]
 
     # Tells Django that the UserManager class defined above should manage
     # objects of this type.
@@ -100,7 +97,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         Typically this would be the user's first and last name. Since we do
         not store the user's real name, we return their username instead.
         """
-        return '{self.first_name} {self.last_name }'
+        return "{self.first_name} {self.last_name }"
 
     def get_short_name(self):
         """

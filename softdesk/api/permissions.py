@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS  # , is_authenticated
+from rest_framework.permissions import BasePermission
 from .models import Contributor, Project, Issue, Comment
 
 # |   Role     | Project  | Iss/Comm. | Contrib |
@@ -34,14 +34,14 @@ class ContributorReadCreateAuthorUpdateDelete(BasePermission):
 
         # lookup section
         # hence check if request.user is contributor
-        if view.kwargs.get('project_pk'):
+        if view.kwargs.get("project_pk"):
             # non project level objects have url embeded with a project
-            current_project_id = view.kwargs.get('project_pk')
+            current_project_id = view.kwargs.get("project_pk")
         if obj.pk:
             current_obj_pk = obj.pk
         # get the member list for the current project
         if isinstance(obj, Project) or isinstance(obj, Issue) or isinstance(obj, Comment):
-            if not view.kwargs.get('project_pk'):
+            if not view.kwargs.get("project_pk"):
                 current_project_id = current_obj_pk
             project_members = Contributor.objects.filter(project=current_project_id)
 
