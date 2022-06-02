@@ -1,6 +1,15 @@
+![forthebadge](https://forthebadge.com/images/badges/cc-0.svg)
+![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)  
+
+![forthebadge](img/softdesk-api-django-apitestcase-pass-6_6.svg)![forthebadge](img/softdesk-api-postman-test-pass-26_26.svg)  
+
+
 # ocr-p10 Créez une API sécurisée RESTful en utilisant Django REST
 
-Disclaimer
+
+![forthebadge](img/switch-language-english.svg)  
+  
+## Disclaimer
 
 ---
 
@@ -13,67 +22,46 @@ The additionnal code follows "CC BY-SA ".
   
 ** Not to be used for production **  
 
-
----
-## Objet.  
-  
-Développer le back-end d'une application de suivi des problèmes, basée sur la mise à disposition d'une API RESTful.
-
-* L'application permettra essentiellement aux utilisateurs de créer divers projets, d'ajouter des utilisateurs à des projets spécifiques, de créer des problèmes au sein des projets et d'attribuer des libellés à ces problèmes en fonction de leurs priorités, de balises, etc.
-* Une application de suivi des problèmes pour les trois plateformes (site web, applications Android et iOS).
-* Les trois applications exploiteront les points de terminaison d'API qui serviront les données.
-  
-### Models
-
-Chaque **problème** doit avoir un titre, une description, un assigné (l’assigné par défaut étant l'auteur lui-même), une priorité (FAIBLE, MOYENNE ou ÉLEVÉE), une balise (BUG, AMÉLIORATION ou TÂCHE), un statut (À faire, En cours ou Terminé), le project_id auquel il est lié et un created_time (horodatage), ainsi que d'autres attributs mentionnés dans le diagramme de classe.
-
-Les problèmes peuvent faire l'objet de **commentaires** de la part des contributeurs au projet auquel ces problèmes appartiennent. Chaque commentaire doit être assorti d'une description, d'un author_user_id, d'un issue_id, et d'un comment_id.
-
-Remarque: Il est interdit à tout utilisateur autorisé autre que l'auteur d'émettre des requêtes d'actualisation et de suppression d'un problème/projet/commentaire.
-
-Un document répertorie les mesures de sécurité OWASP que le back-end devra respecter.
-
-
 ---
 
-
-
+![forthebadge](img/switch-language-french.svg)  
+  
 ## Installation
 
-Pour utiliser les scripts,
+Pour démarrer le serveur d'API en local,
 il est conseillé sous le prompt bash python (ici cmd Anaconda3 sous Windows 10):
 
 1.  de cloner l'ensemble du répertoire github dans un répertoire local dédié.
-    git clone https://github.com/dev-KC20/ocr-p10.git
+    git clone https://github.com/dev-KC20/ocr-p10.git  
+  
+2.  se déplacer dans le sous répertoire de travail   
+    cd ocr-p10  
+  
+3. créer un environnement virtuel python, ENV  
+    python -m venv ENV  
+  
+4.  d'activer un environnement virtuel python, ENV  
+    ENV\scripts\activate.bat  
 
-2.  se déplacer dans le sous répertoire de travail ocr-p9-main
-    cd ocr-p10
-
-3. créer un environnement virtuel python, ENV
-    python -m venv ENV
-
-4.  d'activer un environnement virtuel python, ENV
-    ENV\scripts\activate.bat
-
-5.  d'installer les paquets requis pour mémoire,
-    pip install -r requirements-dev.txt
-
-6.  de créer un fichier .env sous le répertoire courant afin de contenir les "secrets" (cf. plus bas) :
-    
-        # SECURITY WARNING: keep the secret key used in production secret!
-        SECRET_KEY = blabla
-        DEBUG = True
-
-7.  d'exécuter la migration des modèles 
-    python manage.py migrate
-
-8.  d'exécuter le script serveur 
-    python manage.py runserver
-
-9.  d'accéder à l'application servie par Django en cliquant sur :
-    http://127.0.0.1:8000/
-
-
+5.  d'installer les paquets requis,  
+    pip install -r requirements-dev.txt  
+  
+6.  de créer un fichier .env sous le répertoire courant afin de contenir les "secrets" (cf. plus bas) :  
+      
+        # SECURITY WARNING: keep the secret key used in production secret!  
+        SECRET_KEY = blabla  
+        DEBUG = True  
+  
+7.  d'exécuter la migration des modèles  
+    python manage.py migrate  
+  
+8.  d'exécuter le script serveur  
+    python manage.py runserver  
+  
+9.  d'accéder à l'application servie par Django en se rendant sur :  
+    http://127.0.0.1:8000/   
+  
+   
 
 
 ### Gestion des secrets
@@ -82,7 +70,7 @@ Django utilise un "secret" pour générer ses certificats et recommande de garde
 Nous utilisons le paquet python-decouple pour remplacer les clés de secret par leur valeur dans le fichier settings.py :
 Le fait de stocker les secrets dans un fichier .env évite de le "committer" par accident sur un dépôt centralisé grâce au paramétrage de notre .gitignore.
 
-S'agissant d'un exercice pédagogique, nous voulons permettre d'utiliser notre code source et éventuelles données tout en respectant les bonnes pratiques. C'est pourquoi nous affichons en clair ce secret dans les instructions d'installation de ce readme.
+S'agissant d'un exercice pédagogique, nous voulons permettre d'utiliser notre code source et éventuelles données tout en respectant les bonnes pratiques. C'est pourquoi nous autorisons exceptionnellement le commit du fichier .env.
 
 ```py
 from decouple import config
@@ -93,8 +81,6 @@ SECRET_KEY = config("SECRET_KEY")
 
 Références: 
 
-cf. [Réglages | Documentation de Django | Django](https://docs.djangoproject.com/fr/4.0/ref/settings/#password-hashers)
-
 **Gardez cette valeur secrète.**
 Le fonctionnement de Django avec une clé [`SECRET_KEY`](https://docs.djangoproject.com/fr/4.0/ref/settings/#std:setting-SECRET_KEY) connue réduit à néant de nombreuses protections de sécurité de Django et peut amener à une élévation de privilèges et à des vulnérabilités d’exécution de code à distance.
 
@@ -103,15 +89,7 @@ cf. [GitHub - henriquebastos/python-decouple: Strict separation of config from c
 ## [Python Decouple: Strict separation of settings from code](https://github.com/henriquebastos/python-decouple/#id1)
 _Decouple_ helps you to organize your settings so that you can change parameters without having to redeploy your app.
 
-If `SECRET_KEY` is not present in the `.env`, _decouple_ will raise an `UndefinedValueError`.
-
-
-
-### Conformité PEP8
-
-### Mesures OWASP
-### Conformité RGPG
-### Crédits et lectures intérestantes
+## Crédits et lectures intérestantes
 
 Openclassrooms, bien-sur et surtout le discord DA Python!
 
@@ -131,8 +109,10 @@ J.V. Zammit @untangled.dev pour son 'explicatif' guide : [A minimal Django testi
 
 Lacey Williams Henschel for her great series about and more precisely [What You Should Know About DRF, Part 1: ModelViewSet attributes and methods — Lacey Williams Henschel](https://www.laceyhenschel.com/blog/2021/2/22/what-you-should-know-about-drf-part-1-modelviewset-attributes-and-methods)
 
+![forthebadge](img/switch-language-english.svg)  
 
-## Documentation de Softdesk API
+
+## Softdesk API documentation
 
 ### Introduction
 
@@ -220,7 +200,7 @@ No limits of request were set in version 1 of the SoftDesk API.
 
 ## Tests passed
 
-### Postman Test 26/26
+### Postman Test pass 26/26
 
 ![Postman 1/3](img/postman-test-1.png)  
 
@@ -228,7 +208,7 @@ No limits of request were set in version 1 of the SoftDesk API.
 
 ![Postman 3/3](img/postman-test-3.png)  
 
-### Django ApiTestCase 6/6
+### Django ApiTestCase pass 6/6
 
 ```bash
 python manage.py test

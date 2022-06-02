@@ -11,6 +11,7 @@ __pycache__/
 *.so
 
 # Visual Studio Code # 
+.vscode\*
 .vscode/*
 .vscode\settings.json
 .vscode/settings.json 
@@ -125,7 +126,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+# best pratise is to uncomment .env where the SECRET lays
+#.env
 .venv
 env/
 venv/
