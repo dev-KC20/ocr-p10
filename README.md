@@ -6,7 +6,7 @@
 
 # ocr-p10 Créez une API sécurisée RESTful en utilisant Django REST
 
-- [ocr-p10 Créez une API sécurisée RESTful en utilisant Django REST](#ocr-p10-créez-une-api-sécurisée-restful-en-utilisant-django-rest)
+- Table of Content
   - [Disclaimer](#disclaimer)
   - [Softdesk API documentation](#softdesk-api-documentation)
     - [Introduction](#introduction)
@@ -68,13 +68,35 @@ The application structure includes basically 3 levels of embedded models : Proje
 
 For these, the basic CRUD methods are provided thru the available end-points.
 
+The permissions are granted following the user's role in the workflow:
+
+|   Role     | Project  | Iss/Comm. | Contrib |
+|:----------:|:--------:|:---------:|:-------:|
+|anonymous   | Forbidden|	Forbidden |
+|authenticate|  C       |	C         |
+|contributor |  R       |	CR        |
+|author      |  [CR]UD  |	[CR]UD    | C
+
+
+1. Only authenticated user can acces end-points.
+2. Only contributors can Read Project, Comment or Issue of the project.
+3. Only the author of a project manages (CRUD) new contributor(members).
+4. Only authors can update (U) or delete (D) theirs Project, Comment or Issue.
+
+Authentication is managed in the has_permission method of the permission class.
+Authenticated users can only (R)ead projects & dependencies they are contributor of.
+Any authenticated user can (C)reate a new project & as author/responsible of this project, add new contributors to.
+
+
+
+
 If you need a mock data set for testing purpose, here is what we suggest:
 
-|user/project| 1  |  2 |  3 |  4 | 5 |
-|------------|----|----|----|----|---|
-| 1.adminoc  |    | A  |    |    |   |
-| 2.JohnDoe  | A  |    | A  |  A |   |
-| 3.JaneSmith| (M)|    |    |    | A |
+|id.user/project| 1  |  2 |  3 |  4 | 5 |
+|:-------------:|:--:|:--:|:--:|:--:|:-:|
+| 1.adminoc     |    | A  |    |    |   |
+| 2.JohnDoe     | A  |    | A  |  A |   |
+| 3.JaneSmith   | (M)|    |    |    | A |
 
 (A)uthor ; (M)ember.
 
