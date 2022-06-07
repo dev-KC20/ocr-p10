@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
 from rest_framework.viewsets import ModelViewSet
 
-# from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -10,7 +9,6 @@ from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializ
 from .models import Project, Contributor, Issue, Comment
 from .permissions import ContributorReadCreateAuthorUpdateDelete
 
-# from django.urls import resolve
 from django.shortcuts import get_object_or_404
 
 
@@ -140,20 +138,6 @@ class IssueViewSet(ModelViewSet):
             raise ValidationError(error_message)
 
         super().perform_create(serializer, *args, **kwargs)
-
-    # def destroy(self, request, *args, **kwargs):
-    #     print('retrieve kwargs:', self.kwargs)
-    #     contributor_to_delete = get_object_or_404(self.get_queryset())
-    #     self.check_object_permissions(self.request, contributor_to_delete)
-    #     self.perform_destroy(contributor_to_delete)
-    #     message = 'The contributor was successfully removed from project '
-    #     return Response({'message': message}, status=status.HTTP_204_NO_CONTENT)
-
-    # def retrieve(self, request, *args, **kwargs):
-    #     print('retrieve kwargs:', self.kwargs)
-    #     contributor = get_object_or_404(self.get_queryset())
-    #     serializer = ContributorSerializer(contributor)
-    #     return Response(serializer.data)
 
 
 class CommentViewSet(ModelViewSet):
